@@ -4,7 +4,7 @@
     <b-tabs v-model="tabIndex" card>
       <b-tab title="Code" active>
         <b-card-text>
-          <MonacoEditor class="editor" v-model="code" :language="language"/>
+          <MonacoEditor class="editor" v-model="code" :language="language" :options="{minimap:{enabled:false}}"/>
         </b-card-text>
       </b-tab>
 

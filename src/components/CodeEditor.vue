@@ -16,10 +16,9 @@
     <div id="button-bar">
       <b-button id="run-btn" variant="success" v-on:click="onRun">Run</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
-        <b-dropdown-item href="#">Reset code</b-dropdown-item>
-        <b-dropdown-item href="#">Toggle boilerplate</b-dropdown-item>
-        <b-dropdown-item href="#">Copy to buffer</b-dropdown-item>
-        <b-dropdown-item href="#">Submit an error</b-dropdown-item>
+        <b-dropdown-item href="#" v-on:click="onResetCode">Reset code</b-dropdown-item>
+        <b-dropdown-item href="#" v-on:click="onToggleBoilerplate">Toggle boilerplate</b-dropdown-item>
+        <b-dropdown-item href="#" v-on:click="onSubmitError">Submit an error</b-dropdown-item>
       </b-dropdown>
     </div>
   </b-card>
@@ -45,9 +44,21 @@ export default {
     }
   },
   created: function() {
-    this.code = this.originalCode;
+    this.onResetCode();
   },
   methods: {
+    onResetCode() {
+      this.code = this.originalCode;
+    },
+
+    onToggleBoilerplate() {
+      alert('not implemented');
+    },
+
+    onSubmitError() {
+      alert('not implemented');
+    },
+
     onRun() {
       const code = this.code;
       this.tabIndex = 1;
@@ -56,7 +67,7 @@ export default {
       const ws = new WebSocket('ws://localhost:1556/run');
 
       ws.addEventListener('open', function () {
-        // TODO: check if the code is too large?
+        // TODO: check if the code is too large
         const msg = {
           source_files: [
             {

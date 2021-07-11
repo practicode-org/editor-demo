@@ -43,12 +43,12 @@ export default {
 }
 
 #left {
-  flex-grow: 1;
+  width: 50%;
   border: 1px solid red;
 }
 
 #right {
-  flex-grow: 1;
+  width: 50%;
   border: 1px solid green;
 }
 </style>

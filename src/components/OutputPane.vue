@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="output-editor">
     <b-card-text>
       <div class="output-section" :class="{ error: st.exitCode > 0 }" v-for="st in stages" v-bind:key="st.id">
         <div v-for="(t, idx) in st.prologue" class="event-msg" v-bind:key="idx">
@@ -121,6 +121,9 @@ export default {
     addDuration(seconds, stage) {
       this.stages[stage].duration = seconds
     },
+  },
+  mounted() {
+    document.querySelector('.output-editor').style.minHeight = document.querySelector('.monaco-editor').style.height || '100%'
   }
 }
 </script>

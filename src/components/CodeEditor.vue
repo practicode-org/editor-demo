@@ -112,6 +112,7 @@ export default {
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-end;
+  align-items: baseline;
 }
 
 #run-btn, #menu-btn {

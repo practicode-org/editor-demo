@@ -134,6 +134,7 @@ export default {
   /*height from the .editor */
   height: 720px;
   overflow-y: auto;
+  word-wrap: break-word;
 }
 .output-section {
   margin: 2px 2px;

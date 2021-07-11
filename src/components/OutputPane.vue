@@ -121,9 +121,6 @@ export default {
     addDuration(seconds, stage) {
       this.stages[stage].duration = seconds
     },
-  },
-  mounted() {
-    document.querySelector('.output-editor').style.minHeight = document.querySelector('.monaco-editor').style.height || '100%'
   }
 }
 </script>
@@ -133,7 +130,11 @@ export default {
   height: 720px;
   text-align: left;
 }
-
+.output-editor {
+  /*height from the .editor */
+  height: 720px;
+  overflow-y: auto;
+}
 .output-section {
   margin: 2px 2px;
   padding: 2px 2px;

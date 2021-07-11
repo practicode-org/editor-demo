@@ -34,21 +34,17 @@ export default {
   flex-flow: row nowrap;
   justify-content: space-evenly;
   align-items: stretch;
-  border: 1px solid red;
 }
 
 #editor {
-  background-color: #faeaff;
   height: 800px;
 }
 
 #left {
   width: 50%;
-  border: 1px solid red;
 }
 
 #right {
   width: 50%;
-  border: 1px solid green;
 }
 </style>

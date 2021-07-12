@@ -30,6 +30,8 @@ import MonacoEditor from 'vue-monaco'
 import OutputPane from '@/components/OutputPane.vue'
 import Vue from 'vue'
 
+const MAX_CODE_SIZE = 16000;
+
 export default {
   name: 'CodeEditor',
   components: {
@@ -62,6 +64,11 @@ export default {
 
     onRun() {
       const code = this.code;
+      if (code.length > MAX_CODE_SIZE) {
+        Vue.toasted.error('Source code is too large (' + code.length.toString() + '), limit is ' + MAX_CODE_SIZE.toString(), { duration: 8000 })
+        return;
+      }
+
       this.tabIndex = 1;
       this.$refs.output.reset();
 

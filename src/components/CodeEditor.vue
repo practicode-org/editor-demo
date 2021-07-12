@@ -19,7 +19,7 @@
       <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
         <b-dropdown-item href="#" v-on:click="onResetCode">Reset code</b-dropdown-item>
-        <b-dropdown-item href="#" v-on:click="onSubmitError">Submit an error</b-dropdown-item>
+        <b-dropdown-item href="https://github.com/practicode-org/editor-demo/issues/new" target="_blank">Submit an error</b-dropdown-item>
       </b-dropdown>
     </div>
   </b-card>

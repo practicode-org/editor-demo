@@ -6,6 +6,7 @@
           <h5 class="mb-0">Task #3: Concurrency - condition_variable</h5>
         </b-card>
     </div>
+    <window-resize></window-resize>
     <!-- Right part -->
     <div id="right">
       <CodeEditor></CodeEditor>
@@ -15,11 +16,13 @@
 
 <script>
 import CodeEditor from '@/components/CodeEditor.vue'
+import WindowResize from '@/components/WindowResize.vue'
 
 export default {
   name: 'TaskWorkaround',
   components: {
-    CodeEditor
+    CodeEditor,
+    WindowResize
   },
   data () {
     return {

@@ -16,9 +16,9 @@
     <div id="button-bar">
       <div id="current-state">{{ stateText }}</div>
       <b-button id="run-btn" variant="success" v-on:click="onRun">Run</b-button>
+      <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
         <b-dropdown-item href="#" v-on:click="onResetCode">Reset code</b-dropdown-item>
-        <b-dropdown-item href="#" v-on:click="onToggleBoilerplate">Toggle boilerplate</b-dropdown-item>
         <b-dropdown-item href="#" v-on:click="onSubmitError">Submit an error</b-dropdown-item>
       </b-dropdown>
     </div>
@@ -44,11 +44,15 @@ export default {
   data() {
     return {
       tabIndex: 0,
+
       originalCode: '#include <iostream>\n#include <chrono>\n#include <thread>\n\nint main() {\n  for (int i = 0; i < 5; i++) {\n    std::this_thread::sleep_for(std::chrono::milliseconds(500));\n    std::cout << "Hello, guys!" << std::endl;\n  }\n  return 0;\n}',
       code: '',
       language: 'cpp',
+
       state: 'idle',
-      stateCompleted: false
+      stateCompleted: false,
+      ws: null,
+      timeouts: []
     }
   },
   created: function() {
@@ -96,6 +100,7 @@ export default {
       this.state = 'wait';
 
       const ws = new WebSocket('ws://localhost:1556/run');
+      this.ws = ws;
 
       ws.addEventListener('open', function () {
         const msg = {
@@ -137,26 +142,53 @@ export default {
           this.$refs.output.addDuration(msg.duration_sec, msg.stage)
         }
       });
+
       ws.addEventListener('close', (evt) => {
         if (!this.stateCompleted) {
           this.$refs.output.addEvent('completed', msg.stage)
           Vue.toasted.error('Websocket unexpectedly closed', { duration: 8000 })
         }
         this.state = 'idle';
+        this.ws = null;
       });
+
       ws.addEventListener('error', (evt) => {
         Vue.toasted.error('Websocket error: ' + JSON.stringify(evt), { duration: 8000 })
       });
 
-      setTimeout(() => {
-        this.state = 'long-wait';
+      const tid1 = setTimeout(() => {
+        if (this.state === 'wait') {
+          this.state = 'long-wait';
+        }
       }, WEBSOCKET_SILENT_WAIT_TIME);
-      setTimeout(() => {
-        this.state = 'idle';
-        ws.close();
-        Vue.toasted.error('Websocket timeout, couldn\'t connect to backend', { duration: 8000 })
+
+      const tid2 = setTimeout(() => {
+        if (this.state === 'long-wait') {
+          this.state = 'idle';
+          ws.close();
+          this.ws = null;
+          Vue.toasted.error('Websocket timeout, couldn\'t connect to backend', { duration: 8000 })
+        }
       }, WEBSOCKET_CONNECTION_TIMEOUT);
+
+      this.timeouts.push(tid1);
+      this.timeouts.push(tid2);
     },
+
+    onStop() {
+      if (this.state !== 'run' &&
+        this.state !== 'compile') {
+        return;
+      }
+
+      for (var tid in this.timeouts) {
+        clearTimeout(tid);
+      }
+      this.timeouts = []
+
+      const msg = { command: 'stop' };
+      this.ws.send(JSON.stringify(msg));
+    }
   }
 }
 </script>
@@ -174,8 +206,9 @@ export default {
   align-items: baseline;
 }
 
-#run-btn, #menu-btn {
+#run-btn, #stop-btn, #menu-btn {
   height: 40px;
+  margin: 0px 5px;
 }
 
 #current-state {

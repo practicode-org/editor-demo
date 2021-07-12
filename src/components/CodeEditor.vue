@@ -30,9 +30,10 @@
 import MonacoEditor from 'vue-monaco'
 import OutputPane from '@/components/OutputPane.vue'
 import Vue from 'vue'
+import MD5 from 'crypto-js/md5'
 
 const MAX_CODE_SIZE = 16000;
-const WEBSOCKET_SILENT_WAIT_TIME = 1000; // ms
+const WEBSOCKET_SILENT_WAIT_TIME = 1600; // ms
 const WEBSOCKET_CONNECTION_TIMEOUT = 6000; // ms
 
 export default {
@@ -76,14 +77,6 @@ export default {
       this.code = this.originalCode;
     },
 
-    onToggleBoilerplate() {
-      alert('not implemented');
-    },
-
-    onSubmitError() {
-      alert('not implemented');
-    },
-
     onRun() {
       if (this.state !== 'idle') {
         return;
@@ -108,6 +101,7 @@ export default {
             {
               name: 'src0',
               text: window.btoa(code),
+              hash: MD5(code).toString()
             }
           ]
         };
@@ -145,7 +139,7 @@ export default {
 
       ws.addEventListener('close', (evt) => {
         if (!this.stateCompleted) {
-          this.$refs.output.addEvent('completed', msg.stage)
+          //this.$refs.output.addEvent('completed', msg.stage)
           Vue.toasted.error('Websocket unexpectedly closed', { duration: 8000 })
         }
         this.state = 'idle';

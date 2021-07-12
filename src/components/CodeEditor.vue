@@ -28,6 +28,7 @@
 <script>
 import MonacoEditor from 'vue-monaco'
 import OutputPane from '@/components/OutputPane.vue'
+import Vue from 'vue'
 
 export default {
   name: 'CodeEditor',
@@ -78,8 +79,14 @@ export default {
         };
         ws.send(JSON.stringify(msg));
       });
+
+      var msg = null;
       ws.addEventListener('message', (evt) => {
-        const msg = JSON.parse(evt.data) // is it safe?
+        try {
+          msg = JSON.parse(evt.data) // is it safe?
+        } catch (e) {
+          Vue.toasted.error('Failed to parse JSON from runjail: ' + e.toString(), { duration: 8000 })
+        }
 
         if ('output' in msg) {
           const text = window.atob(msg.output);
@@ -95,7 +102,10 @@ export default {
           this.$refs.output.addDuration(msg.duration_sec, msg.stage)
         }
       });
-      ws.addEventListener('close', function () {
+      ws.addEventListener('close', function (evt) {
+      });
+      ws.addEventListener('error', function (evt) {
+        Vue.toasted.error('Websocket error: ' + JSON.stringify(evt), { duration: 8000 })
       });
     },
   }

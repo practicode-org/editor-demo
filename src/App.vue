@@ -29,5 +29,9 @@ export default {
   color: #2c3e50;
   margin-top: 20px;
 }
-
+.monaco-editor,
+.overflow-guard,
+.monaco-scrollable-element {
+  width: 100% !important;
+}
 </style>

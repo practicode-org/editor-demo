@@ -32,6 +32,8 @@ import OutputPane from '@/components/OutputPane.vue'
 import Vue from 'vue'
 
 const MAX_CODE_SIZE = 16000;
+const WEBSOCKET_SILENT_WAIT_TIME = 1000; // ms
+const WEBSOCKET_CONNECTION_TIMEOUT = 6000; // ms
 
 export default {
   name: 'CodeEditor',
@@ -45,7 +47,8 @@ export default {
       originalCode: '#include <iostream>\n#include <chrono>\n#include <thread>\n\nint main() {\n  for (int i = 0; i < 5; i++) {\n    std::this_thread::sleep_for(std::chrono::milliseconds(500));\n    std::cout << "Hello, guys!" << std::endl;\n  }\n  return 0;\n}',
       code: '',
       language: 'cpp',
-      state: 'idle'
+      state: 'idle',
+      stateCompleted: false
     }
   },
   created: function() {
@@ -53,10 +56,13 @@ export default {
   },
   computed: {
     stateText: function() {
-      if (this.state === 'compile') {
-        return 'Compiling...';
-      } else if (this.state === 'run') {
-        return 'Running...';
+      switch (this.state) {
+        case 'compile':
+          return 'Compiling...';
+        case 'run':
+          return 'Running...';
+        case 'long-wait':
+          return 'Waiting...';
       }
       return '';
     }
@@ -118,6 +124,9 @@ export default {
         if ('event' in msg) {
           if (msg.event === 'started') {
             this.state = msg.stage;
+            this.stateCompleted = false;
+          } if (msg.event === 'completed') {
+            this.stateCompleted = true;
           }
           this.$refs.output.addEvent(msg.event, msg.stage)
         }
@@ -129,11 +138,24 @@ export default {
         }
       });
       ws.addEventListener('close', (evt) => {
+        if (!this.stateCompleted) {
+          this.$refs.output.addEvent('completed', msg.stage)
+          Vue.toasted.error('Websocket unexpectedly closed', { duration: 8000 })
+        }
         this.state = 'idle';
       });
       ws.addEventListener('error', (evt) => {
         Vue.toasted.error('Websocket error: ' + JSON.stringify(evt), { duration: 8000 })
       });
+
+      setTimeout(() => {
+        this.state = 'long-wait';
+      }, WEBSOCKET_SILENT_WAIT_TIME);
+      setTimeout(() => {
+        this.state = 'idle';
+        ws.close();
+        Vue.toasted.error('Websocket timeout, couldn\'t connect to backend', { duration: 8000 })
+      }, WEBSOCKET_CONNECTION_TIMEOUT);
     },
   }
 }

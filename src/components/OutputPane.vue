@@ -1,7 +1,7 @@
 <template>
   <div class="output-editor">
     <b-card-text>
-      <div class="output-section" :class="{ error: st.exitCode > 0 }" v-for="st in stages" v-bind:key="st.id">
+      <div class="output-section" :class="{ error: st.exitCode > 0 || st.error }" v-for="st in stages" v-bind:key="st.id">
         <div v-for="(t, idx) in st.prologue" class="event-msg" v-bind:key="idx">
           {{ t }}
         </div>
@@ -38,29 +38,34 @@ export default {
       this.stages = {}
     },
 
-    addOutput(str, stage) {
-      if (!(stage in this.stages)) {
-        alert('error 1');
+    canAppendOutput(stage) {
+      const output = this.stages[stage].output;
+      if (output.length > 0) {
+        const lastStr = output[output.length - 1];
+        if (lastStr.length === 0 || lastStr[lastStr.length - 1] !== '\n') {
+          return true;
+        }
       }
-      if (stage !== this.currentStage) {
-        alert('error 2');
-      }
-      this.stages[stage].output.push(str);
+      return false;
     },
 
-    addEvent(eventName, stage) {
-      if (eventName === 'started') {
-        if (stage === 'compile') {
-          if (this.currentStage !== '') {
-            alert('error 3');
-          }
-        }
-        if (stage in this.stages) {
-          alert('error 4');
-        }
+    addOutput(str, stage) {
+      if (!(stage in this.stages)) {
+        Vue.toasted.error('Error: got output, but there\'s no stage \'' + stage + '\'', { duration: 8000 })
+      }
+      if (stage !== this.currentStage) {
+        Vue.toasted.error('Error: got ouput, but stage \'' + stage + '\' doesn\'t match current stage \'' + this.currentStage + '\'', { duration: 8000 })
+      }
+      if (this.canAppendOutput(stage)) {
+        const output = this.stages[stage].output;
+        output[output.length - 1] += str;
+      } else {
+        this.stages[stage].output.push(str);
+      }
+    },
 
-        this.currentStage = stage
-
+    ensureStage(stage) {
+      if (!(stage in this.stages)) {
         Vue.set(this.stages, stage, {
           id: stage,
           prologue: [],
@@ -69,13 +74,36 @@ export default {
           exitCode: -1,
           duration: 0.0,
           completed: false,
+          error: false // true when runjail had an error
         });
+      }
+    },
+
+    addError(description, stage) {
+      this.ensureStage(stage);
+      this.stages[stage].epilogue.push(description);
+      this.stages[stage].error = true;
+    },
+
+    addEvent(eventName, stage) {
+      if (eventName === 'started') {
+        if (stage === 'compile') {
+          if (this.currentStage !== '') {
+            Vue.toasted.error('Error: got started event, but current stage is \'' + stage + '\'', { duration: 8000 })
+          }
+        }
+        if (stage in this.stages) {
+          Vue.toasted.error('Error: got an event, but there\'s no stage \'' + stage + '\'', { duration: 8000 })
+        }
+
+        this.currentStage = stage
+        this.ensureStage(stage);
       } else if (eventName === 'completed') {
         if (this.currentStage === '') {
-          alert('error 5');
+          Vue.toasted.error('Error: got completed event, while current stage is empty', { duration: 8000 })
         }
         if (!(stage in this.stages)) {
-          alert('error 6');
+          Vue.toasted.error('Error: got an event, but there\'s no stage \'' + stage + '\'', { duration: 8000 })
         }
         this.stages[stage].completed = true
       }

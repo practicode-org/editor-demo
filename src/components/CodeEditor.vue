@@ -120,6 +120,9 @@ export default {
           const text = window.atob(msg.output);
           this.$refs.output.addOutput(text, msg.stage);
         }
+        if ('error' in msg) {
+          this.$refs.output.addError(msg.description, msg.stage);
+        }
         if ('event' in msg) {
           if (msg.event === 'started') {
             this.state = msg.stage;

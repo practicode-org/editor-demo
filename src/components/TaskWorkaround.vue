@@ -3,13 +3,16 @@
     <!-- Left part -->
     <div id="left">
         <b-card class="mb-2">
-          <h5 class="mb-0">Task #3: Concurrency - condition_variable</h5>
+          <h5 class="mb-0">{{ title }}</h5>
+        </b-card>
+        <b-card>
+          {{ text }}
         </b-card>
     </div>
     <window-resize></window-resize>
     <!-- Right part -->
     <div id="right">
-      <CodeEditor></CodeEditor>
+      <CodeEditor :init-lang="lang"></CodeEditor>
     </div>
   </div>
 </template>
@@ -24,8 +27,17 @@ export default {
     CodeEditor,
     WindowResize
   },
+  props: {
+    initTitle: String,
+    initTaskId: String,
+    initLang: String
+  },
   data () {
     return {
+      title: this.initTitle,
+      text: '',
+      taskId: this.initTaskId,
+      lang: this.initLang
     }
   }
 }

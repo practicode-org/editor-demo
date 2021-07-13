@@ -15,6 +15,7 @@
 
     <div id="button-bar">
       <div id="current-state">{{ stateText }}</div>
+      <div id="current-state">{{ language }}</div>
       <b-button id="run-btn" variant="success" v-on:click="onRun">Run</b-button>
       <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
@@ -42,13 +43,16 @@ export default {
     MonacoEditor,
     OutputPane,
   },
+  props: {
+    initLang: String
+  },
   data() {
     return {
       tabIndex: 0,
 
       originalCode: '#include <iostream>\n#include <chrono>\n#include <thread>\n\nint main() {\n  for (int i = 0; i < 5; i++) {\n    std::this_thread::sleep_for(std::chrono::milliseconds(500));\n    std::cout << "Hello, guys!" << std::endl;\n  }\n  return 0;\n}',
       code: '',
-      language: 'cpp',
+      language: this.initLang,
 
       state: 'idle',
       stateCompleted: false,

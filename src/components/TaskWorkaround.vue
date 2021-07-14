@@ -100,4 +100,11 @@ export default {
 #task-text {
   padding: 10px;
 }
+
+code {
+  background-color: #d5d5d5;
+  margin: 5px;
+  color: #ff0000;
+  display: inline;
+}
 </style>

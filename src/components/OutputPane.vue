@@ -23,17 +23,17 @@ export default {
   name: 'OutputPane',
   components: {
   },
-  data () {
+  data() {
     return {
       currentStage: '',
       stages: {},
     }
   },
-  created: function () {
+  created: function() {
     this.reset()
   },
   methods: {
-    reset () {
+    reset() {
       this.currentStage = '';
       this.stages = {}
     },

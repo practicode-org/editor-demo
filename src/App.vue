@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <TaskWorkaround init-title="C++ task example" init-id="cpp-condition-variable" init-lang="cpp"></TaskWorkaround>
-    <TaskWorkaround init-title="Go task example" init-id="go-channels" init-lang="go"></TaskWorkaround>
-    <TaskWorkaround init-title="Python task example" init-id="python-whats-new" init-lang="python"></TaskWorkaround>
+    <TaskWorkaround init-title="C++ task example" init-task-id="cpp-example-task-1" init-lang="cpp"></TaskWorkaround>
+    <TaskWorkaround init-title="Go task example" init-task-id="golang-example-task-1" init-lang="go"></TaskWorkaround>
+    <TaskWorkaround init-title="Python task example" init-lang="python"></TaskWorkaround>
   </div>
 </template>
 

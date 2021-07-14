@@ -42,26 +42,30 @@ export default {
     MonacoEditor,
     OutputPane,
   },
+
   props: {
     initLang: String
   },
+
   data() {
     return {
       tabIndex: 0,
 
-      originalCode: '#include <iostream>\n#include <chrono>\n#include <thread>\n\nint main() {\n  for (int i = 0; i < 5; i++) {\n    std::this_thread::sleep_for(std::chrono::milliseconds(500));\n    std::cout << "Hello, guys!" << std::endl;\n  }\n  return 0;\n}',
+      originalCode: '',
       code: '',
       language: this.initLang,
 
       state: 'idle',
       stateCompleted: false,
       ws: null,
-      timeouts: []
+      timeouts: [],
     }
   },
+
   created: function() {
     this.onResetCode();
   },
+
   computed: {
     stateText: function() {
       switch (this.state) {
@@ -75,6 +79,7 @@ export default {
       return '';
     }
   },
+
   methods: {
     onResetCode() {
       this.code = this.originalCode;
@@ -145,7 +150,6 @@ export default {
 
       ws.addEventListener('close', (evt) => {
         if (!this.stateCompleted) {
-          //this.$refs.output.addEvent('completed', msg.stage)
           Vue.toasted.error('Websocket unexpectedly closed', { duration: 8000 })
         }
         this.state = 'idle';
@@ -188,6 +192,12 @@ export default {
 
       const msg = { command: 'stop' };
       this.ws.send(JSON.stringify(msg));
+    },
+
+    setSourceCode(text) {
+      // TODO: disable editor before this
+      this.originalCode = text;
+      this.onResetCode();
     }
   }
 }

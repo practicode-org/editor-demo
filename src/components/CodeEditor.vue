@@ -15,7 +15,6 @@
 
     <div id="button-bar">
       <div id="current-state">{{ stateText }}</div>
-      <div id="current-state">{{ language }}</div>
       <b-button id="run-btn" variant="success" v-on:click="onRun">Run</b-button>
       <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">

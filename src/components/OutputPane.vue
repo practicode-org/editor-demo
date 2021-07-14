@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       currentStage: '',
-      stages: {}
+      stages: {},
     }
   },
   created: function () {
@@ -38,17 +38,6 @@ export default {
       this.stages = {}
     },
 
-    canAppendOutput(stage) {
-      const output = this.stages[stage].output;
-      if (output.length > 0) {
-        const lastStr = output[output.length - 1];
-        if (lastStr.length === 0 || lastStr[lastStr.length - 1] !== '\n') {
-          return true;
-        }
-      }
-      return false;
-    },
-
     addOutput(str, stage) {
       if (!(stage in this.stages)) {
         Vue.toasted.error('Error: got output, but there\'s no stage \'' + stage + '\'', { duration: 8000 })
@@ -56,12 +45,26 @@ export default {
       if (stage !== this.currentStage) {
         Vue.toasted.error('Error: got ouput, but stage \'' + stage + '\' doesn\'t match current stage \'' + this.currentStage + '\'', { duration: 8000 })
       }
-      if (this.canAppendOutput(stage)) {
-        const output = this.stages[stage].output;
-        output[output.length - 1] += str;
-      } else {
-        this.stages[stage].output.push(str);
+      if (str === '') {
+        return;
       }
+
+      // split on \n
+      const strs = str.split('\n');
+      for (const i in strs) {
+        const s = strs[i];
+        if (s === '') {
+          continue;
+        }
+        // append to the previous line, if it's not finished by a newline
+        if (this.stages[stage].newLine) {
+          this.stages[stage].output.push(s);
+        } else {
+          const output = this.stages[stage].output;
+          output[output.length - 1] += s;
+        }
+      }
+      this.stages[stage].newLine = str[str.length - 1] === '\n';
     },
 
     ensureStage(stage) {
@@ -74,7 +77,8 @@ export default {
           exitCode: -1,
           duration: 0.0,
           completed: false,
-          error: false // true when runjail had an error
+          error: false, // true when runjail had an error
+          newLine: true // next output line should be new line
         });
       }
     },

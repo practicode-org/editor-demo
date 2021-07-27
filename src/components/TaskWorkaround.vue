@@ -2,11 +2,11 @@
   <div class="container">
     <!-- Left part -->
     <div id="left">
-        <b-card class="mb-2">
-          <h5 class="mb-0">{{ title }}</h5>
-        </b-card>
-        <b-card id="task-text" v-html="text">
-        </b-card>
+      <b-card class="mb-2">
+        <h5 class="mb-0">{{ title }}</h5>
+      </b-card>
+      <b-card id="task-text" v-html="text">
+      </b-card>
     </div>
     <window-resize></window-resize>
     <!-- Right part -->
@@ -44,10 +44,10 @@ export default {
     }
   },
 
-  created: function() {
-    const endpoint = 'http://127.0.0.1:8000';
+  created: function () {
     const getTask = (id) => {
-      fetch(endpoint + '/tasks/' + id)
+      const url = '/tasks/' + id;
+      fetch(url)
         .then((resp) => {
           return resp.text();
         })
@@ -55,7 +55,8 @@ export default {
           // extract source code, it's placed inside <!-- ... -->
           let i1 = text.indexOf('<!--');
           const i2 = text.indexOf('-->');
-          for (var i = i1 + 4; i < i2; i++) { // skip the first empty line
+          let i
+          for (i = i1 + 4; i < i2; i++) { // skip the first empty line
             if (text[i] !== ' ' || text[i] !== '\n') {
               break;
             }
@@ -67,7 +68,7 @@ export default {
           }
         })
         .catch(err => {
-          Vue.toasted.error(`Failed to fetch task from ${endpoint}: ${err}`, { duration: 8000 })
+          Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 })
         });
     }
     if (this.taskId) {

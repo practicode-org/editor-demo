@@ -15,7 +15,7 @@
 
     <div id="button-bar">
       <div id="current-state">{{ stateText }}</div>
-      <b-button id="run-btn" variant="success" v-on:click="onRun">Run</b-button>
+      <b-button id="run-btn" variant="success" :disabled="readyToRun" v-on:click="onRun">Run</b-button>
       <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
         <b-dropdown-item href="#" v-on:click="onResetCode">Reset code</b-dropdown-item>
@@ -57,12 +57,14 @@ export default {
 
       state: 'idle',
       stateCompleted: false,
+      wsUrl: '',
       ws: null,
       timeouts: [],
     }
   },
 
   created: function() {
+    this.fetchRunjailWebsocketUrl();
     this.onResetCode();
   },
 
@@ -77,6 +79,9 @@ export default {
           return 'Waiting...';
       }
       return '';
+    },
+    readyToRun() {
+      return this.wsUrl.length === 0 || this.state.idle;
     }
   },
 
@@ -85,8 +90,28 @@ export default {
       this.code = this.originalCode;
     },
 
+    fetchRunjailWebsocketUrl() {
+      this.state = 'wait';
+      fetch('/runjail')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.RUNJAIL_WEBSOCKET.length) {
+            this.wsUrl = data.RUNJAIL_WEBSOCKET;
+            this.state = 'idle';
+          }
+        })
+        .catch(error => {
+          Vue.toasted.error('Failed to fetch runjail websocket url: ' + error.toString(), { duration: 8000 })
+        });
+    },
+
     onRun() {
       if (this.state !== 'idle') {
+        return;
+      }
+
+      if (!this.wsUrl.length) {
+        Vue.toasted.error('Undefined ws url', { duration: 8000 })
         return;
       }
 
@@ -99,8 +124,8 @@ export default {
       this.tabIndex = 1;
       this.$refs.output.reset();
       this.state = 'wait';
+      const ws = new WebSocket(this.wsUrl);
 
-      const ws = new WebSocket('ws://localhost:1556/run');
       this.ws = ws;
 
       ws.addEventListener('open', function () {

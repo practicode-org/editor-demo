@@ -1,11 +1,13 @@
 FROM node:latest as build-stage
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm clean-install
 COPY ./ .
 RUN npm run build
 
 FROM nginx as production-stage
-RUN mkdir /app
+
+WORKDIR /app
+
 COPY --from=build-stage /app/dist /app
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/templates/nginx.conf.template

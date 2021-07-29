@@ -64,7 +64,7 @@ export default {
   },
 
   created: function() {
-    this.fetchRunjailWebsocketUrl();
+    this.fetchRunnerWebsocketUrl();
     this.onResetCode();
   },
 
@@ -90,18 +90,18 @@ export default {
       this.code = this.originalCode;
     },
 
-    fetchRunjailWebsocketUrl() {
+    fetchRunnerWebsocketUrl() {
       this.state = 'wait';
-      fetch('/runjail')
+      fetch('/api/v1/runner')
         .then(response => response.json())
         .then(data => {
-          if (data && data.RUNJAIL_WEBSOCKET.length) {
-            this.wsUrl = data.RUNJAIL_WEBSOCKET;
+          if (data && data.RUNNER_WEBSOCKET_URL.length) {
+            this.wsUrl = data.RUNNER_WEBSOCKET_URL;
             this.state = 'idle';
           }
         })
         .catch(error => {
-          Vue.toasted.error('Failed to fetch runjail websocket url: ' + error.toString(), { duration: 8000 })
+          Vue.toasted.error('Failed to fetch runner websocket url: ' + error.toString(), { duration: 8000 })
         });
     },
 
@@ -146,7 +146,7 @@ export default {
         try {
           msg = JSON.parse(evt.data)
         } catch (e) {
-          Vue.toasted.error('Failed to parse JSON from runjail: ' + e.toString(), { duration: 8000 })
+          Vue.toasted.error('Failed to parse JSON from runner: ' + e.toString(), { duration: 8000 })
         }
 
         if ('output' in msg) {

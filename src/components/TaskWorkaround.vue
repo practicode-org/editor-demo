@@ -46,7 +46,7 @@ export default {
 
   created: function () {
     const getTask = (id) => {
-      const url = '/tasks/' + id;
+      const url = '/api/v1/tasks/' + id;
       fetch(url)
         .then((resp) => {
           return resp.text();

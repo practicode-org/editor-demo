@@ -77,7 +77,7 @@ export default {
           exitCode: -1,
           duration: 0.0,
           completed: false,
-          error: false, // true when runjail had an error
+          error: false, // true when runner had an error
           newLine: true // next output line should be new line
         });
       }

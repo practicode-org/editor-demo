@@ -16,6 +16,7 @@ module.exports = {
     'semi': 'off',
     'space-before-function-paren': 'off',
     'comma-dangle': 'off',
-    'spaced-comment': 'off'
+    'spaced-comment': 'off',
+    'no-console': 'off'
   }
 }

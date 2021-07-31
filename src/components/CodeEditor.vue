@@ -54,6 +54,7 @@ export default {
       originalCode: '',
       code: '',
       language: this.initLang,
+      taskTemplate: '',
 
       state: 'idle',
       stateCompleted: false,
@@ -114,6 +115,10 @@ export default {
         Vue.toasted.error('Undefined ws url', { duration: 8000 })
         return;
       }
+      if (!this.taskTemplate.length) {
+        Vue.toasted.error('Undefined task template', { duration: 8000 })
+        return;
+      }
 
       const code = this.code;
       if (code.length > MAX_CODE_SIZE) {
@@ -124,7 +129,8 @@ export default {
       this.tabIndex = 1;
       this.$refs.output.reset();
       this.state = 'wait';
-      const ws = new WebSocket(this.wsUrl);
+
+      const ws = new WebSocket(this.wsUrl + '?task-template=' + this.taskTemplate);
 
       this.ws = ws;
 
@@ -223,6 +229,10 @@ export default {
       // TODO: disable editor before this
       this.originalCode = text;
       this.onResetCode();
+    },
+
+    setTaskTemplate(taskTemplate) {
+      this.taskTemplate = taskTemplate;
     }
   }
 }

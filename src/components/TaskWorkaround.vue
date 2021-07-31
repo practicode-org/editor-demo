@@ -49,23 +49,14 @@ export default {
       const url = '/api/v1/tasks/' + id;
       fetch(url)
         .then((resp) => {
-          return resp.text();
+          return resp.json();
         })
-        .then((text) => {
-          // extract source code, it's placed inside <!-- ... -->
-          let i1 = text.indexOf('<!--');
-          const i2 = text.indexOf('-->');
-          let i
-          for (i = i1 + 4; i < i2; i++) { // skip the first empty line
-            if (text[i] !== ' ' || text[i] !== '\n') {
-              break;
-            }
-          }
-          i1 = i + 1;
-          if (i1 !== -1 && i2 !== -1) {
-            this.text = text.substring(0, i1 - 1);
-            this.$refs.codeEditor.setSourceCode(text.substring(i1, i2 - 1));
-          }
+        .then((json) => {
+          this.titile = json.title;
+          this.text = window.atob(json.text);
+          this.lang = json.lang;
+          this.$refs.codeEditor.setSourceCode(window.atob(json.code[0].text));
+          this.$refs.codeEditor.setTaskTemplate(json.task_template);
         })
         .catch(err => {
           Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 })

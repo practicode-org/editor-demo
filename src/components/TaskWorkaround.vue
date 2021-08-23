@@ -49,7 +49,14 @@ export default {
       const url = '/api/v1/tasks/' + id;
       fetch(url)
         .then((resp) => {
-          return resp.json();
+          return resp.text();
+        })
+        .then((text) => {
+          console.log(text);
+          return JSON.parse(text);
+        })
+        .catch(err => {
+          Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 })
         })
         .then((json) => {
           this.titile = json.title;
@@ -59,7 +66,7 @@ export default {
           this.$refs.codeEditor.setTaskTemplate(json.task_template);
         })
         .catch(err => {
-          Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 })
+          Vue.toasted.error(`Failed to parse task from ${url}: ${err}`, { duration: 8000 })
         });
     }
     if (this.taskId) {

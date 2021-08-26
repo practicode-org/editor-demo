@@ -58,7 +58,7 @@ export default {
       originalCode: '',
       code: '',
       language: this.initLang,
-      taskTemplate: '',
+      buildEnv: '',
 
       state: 'idle',
       queueNum: 0, // when waiting in a client queue, this is your number in the queue (1 => only one request is ahead of you, you're next)
@@ -124,8 +124,12 @@ export default {
         Vue.toasted.error('Undefined ws url', { duration: 8000 })
         return;
       }
-      if (!this.taskTemplate.length) {
-        Vue.toasted.error('Undefined task template', { duration: 8000 })
+      if (!this.buildEnv.length) {
+        Vue.toasted.error('Undefined buildEnv', { duration: 8000 })
+        return;
+      }
+      if (!this.taskId.length) {
+        Vue.toasted.error('Undefined taskId', { duration: 8000 })
         return;
       }
 
@@ -140,7 +144,9 @@ export default {
       this.state = 'wait';
 
       this.requestId = ID();
-      const ws = new WebSocket(this.wsUrl + '?build_env=' + this.taskTemplate + '&request_id=' + this.requestId);
+      const target = 'run_tests';
+
+      const ws = new WebSocket(this.wsUrl + '?task_id=' + this.taskId + '&target=' + target + '&build_env=' + this.buildEnv + '&request_id=' + this.requestId);
 
       this.ws = ws;
 
@@ -249,8 +255,12 @@ export default {
       this.onResetCode();
     },
 
-    setTaskTemplate(taskTemplate) {
-      this.taskTemplate = taskTemplate;
+    setTaskId(taskId) {
+      this.taskId = taskId;
+    },
+
+    setBuildEnv(buildEnv) {
+      this.buildEnv = buildEnv;
     }
   }
 }

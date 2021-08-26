@@ -56,17 +56,18 @@ export default {
           return JSON.parse(text);
         })
         .catch(err => {
-          Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 })
+          Vue.toasted.error(`Failed to fetch task from ${url}: ${err}`, { duration: 8000 });
         })
         .then((json) => {
           this.titile = json.title;
           this.text = window.atob(json.text);
           this.lang = json.lang;
+          this.$refs.codeEditor.setTaskId(this.taskId);
+          this.$refs.codeEditor.setBuildEnv(json.build_env);
           this.$refs.codeEditor.setSourceCode(window.atob(json.code[0].text));
-          this.$refs.codeEditor.setTaskTemplate(json.task_template);
         })
         .catch(err => {
-          Vue.toasted.error(`Failed to parse task from ${url}: ${err}`, { duration: 8000 })
+          Vue.toasted.error(`Failed to parse task from ${url}: ${err}`, { duration: 8000 });
         });
     }
     if (this.taskId) {

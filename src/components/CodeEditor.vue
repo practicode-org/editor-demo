@@ -36,6 +36,10 @@ const MAX_CODE_SIZE = 16000;
 const WEBSOCKET_SILENT_WAIT_TIME = 1600; // ms
 const WEBSOCKET_CONNECTION_TIMEOUT = 6000; // ms
 
+var ID = function () {
+  return Math.random().toString(36).substr(2, 9);
+};
+
 export default {
   name: 'CodeEditor',
   components: {
@@ -57,8 +61,10 @@ export default {
       taskTemplate: '',
 
       state: 'idle',
+      queueNum: 0, // when waiting in a client queue, this is your number in the queue (1 => only one request is ahead of you, you're next)
       stateCompleted: false,
       wsUrl: '',
+      requestId: '',
       ws: null,
       timeouts: [],
     }
@@ -77,6 +83,9 @@ export default {
         case 'run':
           return 'Running...';
         case 'long-wait':
+          if (this.queueNum > 0) {
+            return 'Number ' + this.queueNum.toString() + ' in queue...';
+          }
           return 'Waiting...';
       }
       return '';
@@ -130,12 +139,14 @@ export default {
       this.$refs.output.reset();
       this.state = 'wait';
 
-      const ws = new WebSocket(this.wsUrl + '?task-template=' + this.taskTemplate);
+      this.requestId = ID();
+      const ws = new WebSocket(this.wsUrl + '?build_env=' + this.taskTemplate + '&request_id=' + this.requestId);
 
       this.ws = ws;
 
-      ws.addEventListener('open', function () {
+      ws.addEventListener('open', () => {
         const msg = {
+          request_id: this.requestId,
           source_files: [
             {
               name: 'src0',
@@ -177,6 +188,9 @@ export default {
         if ('duration_sec' in msg) {
           this.$refs.output.addDuration(msg.duration_sec, msg.stage)
         }
+        if ('queue' in msg) {
+          this.queueNum = msg.queue;
+        }
       });
 
       ws.addEventListener('close', (evt) => {
@@ -198,7 +212,7 @@ export default {
       }, WEBSOCKET_SILENT_WAIT_TIME);
 
       const tid2 = setTimeout(() => {
-        if (this.state === 'long-wait') {
+        if (this.state === 'long-wait' && this.queueNum === 0) {
           this.state = 'idle';
           ws.close();
           this.ws = null;
@@ -221,8 +235,12 @@ export default {
       }
       this.timeouts = []
 
-      const msg = { command: 'stop' };
+      const msg = {
+        request_id: this.requestId,
+        command: 'stop'
+      };
       this.ws.send(JSON.stringify(msg));
+      this.requestId = '';
     },
 
     setSourceCode(text) {

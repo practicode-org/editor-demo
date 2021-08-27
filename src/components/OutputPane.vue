@@ -91,7 +91,7 @@ export default {
 
     addEvent(eventName, stage) {
       if (eventName === 'started') {
-        if (stage === 'compile') {
+        if (stage === 'compile' || stage === 'compile_tests') {
           if (this.currentStage !== '') {
             Vue.toasted.error('Error: got started event, but current stage is \'' + stage + '\'', { duration: 8000 })
           }
@@ -114,13 +114,13 @@ export default {
 
       // text output
       if (eventName === 'started') {
-        if (stage === 'compile') {
+        if (stage === 'compile' || stage === 'compile_tests') {
           this.stages[stage].prologue.push('Compilation started');
-        } else if (stage === 'run') {
+        } else if (stage === 'run' || stage === 'run_tests') {
           this.stages[stage].prologue.push('Program started');
         }
       } else if (eventName === 'completed') {
-        if (stage === 'compile') {
+        if (stage === 'compile' || stage === 'compile_tests') {
           let text = 'Compilation finished'
           const durationSec = this.stages[stage].duration;
           if (durationSec !== 0.0) {
@@ -128,7 +128,7 @@ export default {
             text += ' in ' + duration.toString() + ' sec';
           }
           this.stages[stage].epilogue.push(text);
-        } else if (stage === 'run') {
+        } else if (stage === 'run' || stage === 'run_tests') {
           let text = 'Program finished';
           const exitCode = this.stages[stage].exitCode;
           if (exitCode !== -1) {

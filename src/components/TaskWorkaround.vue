@@ -52,7 +52,6 @@ export default {
           return resp.text();
         })
         .then((text) => {
-          console.log(text);
           return JSON.parse(text);
         })
         .catch(err => {

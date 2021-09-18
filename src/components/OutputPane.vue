@@ -146,6 +146,21 @@ export default {
       }
     },
 
+    addTestResult(testCase, passed, stage) {
+      this.ensureStage(stage);
+      let text = 'Test case ' + testCase.toString() + ': ';
+      if (passed) {
+        text += 'passed';
+      } else {
+        text += 'failed';
+      }
+      this.stages[stage].epilogue.push(text);
+
+      if (!passed) {
+        this.stages[stage].error = true;
+      }
+    },
+
     addExitCode(code, stage) {
       this.stages[stage].exitCode = code
     },

@@ -15,7 +15,8 @@
 
     <div id="button-bar">
       <div id="current-state">{{ stateText }}</div>
-      <b-button id="run-btn" variant="success" :disabled="readyToRun" v-on:click="onRun">Run</b-button>
+      <b-button id="test-btn" variant="success" :disabled="readyToRun" v-on:click="onTest">Test</b-button>
+      <b-button id="run-btn" variant="success" :disabled="readyToRun" v-on:click="onRun('run')">Run</b-button>
       <b-button id="stop-btn" v-on:click="onStop">Stop</b-button>
       <b-dropdown id="menu-btn" no-caret text="..." toggle-text="" class="m-2">
         <b-dropdown-item href="#" v-on:click="onResetCode">Reset code</b-dropdown-item>
@@ -115,7 +116,7 @@ export default {
         });
     },
 
-    onRun() {
+    onRun(target) {
       if (this.state !== 'idle') {
         return;
       }
@@ -144,7 +145,6 @@ export default {
       this.state = 'wait';
 
       this.requestId = ID();
-      const target = 'run_tests';
 
       const ws = new WebSocket(this.wsUrl + '?task_id=' + this.taskId + '&target=' + target + '&build_env=' + this.buildEnv + '&request_id=' + this.requestId);
 
@@ -168,6 +168,7 @@ export default {
       ws.addEventListener('message', (evt) => {
         try {
           msg = JSON.parse(evt.data)
+          console.log(msg)
         } catch (e) {
           Vue.toasted.error('Failed to parse JSON from runner: ' + e.toString(), { duration: 8000 })
         }
@@ -175,26 +176,29 @@ export default {
         if ('output' in msg) {
           const text = window.atob(msg.output);
           this.$refs.output.addOutput(text, msg.stage);
-        }
-        if ('error' in msg) {
+
+        } else if ('error' in msg) {
           this.$refs.output.addError(msg.description, msg.stage);
-        }
-        if ('event' in msg) {
+
+        } else if ('event' in msg) {
           if (msg.event === 'started') {
             this.state = msg.stage;
             this.stateCompleted = false;
-          } if (msg.event === 'completed') {
+          } else if (msg.event === 'completed') {
             this.stateCompleted = true;
           }
-          this.$refs.output.addEvent(msg.event, msg.stage)
-        }
-        if ('exit_code' in msg) {
-          this.$refs.output.addExitCode(msg.exit_code, msg.stage)
-        }
-        if ('duration_sec' in msg) {
-          this.$refs.output.addDuration(msg.duration_sec, msg.stage)
-        }
-        if ('queue' in msg) {
+          this.$refs.output.addEvent(msg.event, msg.stage);
+
+        } else if ('test_case' in msg) {
+          this.$refs.output.addTestResult(parseInt(msg.test_case, 10), msg.result, msg.stage);
+
+        } else if ('exit_code' in msg) {
+          this.$refs.output.addExitCode(msg.exit_code, msg.stage);
+
+        } else if ('duration_sec' in msg) {
+          this.$refs.output.addDuration(msg.duration_sec, msg.stage);
+
+        } else if ('queue' in msg) {
           this.queueNum = msg.queue;
         }
       });
@@ -228,6 +232,10 @@ export default {
 
       this.timeouts.push(tid1);
       this.timeouts.push(tid2);
+    },
+
+    onTest() {
+      this.onRun('run_tests');
     },
 
     onStop() {

@@ -17,6 +17,7 @@ module.exports = {
     'space-before-function-paren': 'off',
     'comma-dangle': 'off',
     'spaced-comment': 'off',
-    'no-console': 'off'
+    'no-console': 'off',
+    'padded-blocks': 'off'
   }
 }
